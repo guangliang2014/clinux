@@ -1,0 +1,7 @@
+config EDU
+	tristate "EDU PCI device driver"
+	depends on PCI
+	default m
+	help
+	  Educational PCI device driver for the EDU device
+	  (vendor 0x1234 device 0x11e8). Choose M to build as a module.
