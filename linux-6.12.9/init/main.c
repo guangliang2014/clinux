@@ -1101,6 +1101,8 @@ void start_kernel(void)
 	arch_post_acpi_subsys_init();
 	kcsan_init();
 
+	pr_info("$$ Kernel: before rest_init\n");
+
 	/* Do the rest non-__init'ed, we're now alive */
 	rest_init();
 
@@ -1380,6 +1382,7 @@ static int run_init_process(const char *init_filename)
 	const char *const *p;
 
 	argv_init[0] = init_filename;
+	pr_info("$$Run %s as init process\n", init_filename);
 	pr_info("Run %s as init process\n", init_filename);
 	pr_debug("  with arguments:\n");
 	for (p = argv_init; *p; p++)
@@ -1395,6 +1398,7 @@ static int try_to_run_init_process(const char *init_filename)
 	int ret;
 
 	ret = run_init_process(init_filename);
+	pr_debug("$$ kernel_execve returned %d for %s\n", ret, init_filename);
 
 	if (ret && ret != -ENOENT) {
 		pr_err("Starting init: %s exists but couldn't execute it (error %d)\n",
@@ -1466,6 +1470,8 @@ static int __ref kernel_init(void *unused)
 	 */
 	wait_for_completion(&kthreadd_done);
 
+	pr_info("$$ kernel_init got kthreadd_done and continue.\n");
+
 	kernel_init_freeable();
 	/* need to finish all async __init code before freeing the memory */
 	async_synchronize_full();
@@ -1492,6 +1498,8 @@ static int __ref kernel_init(void *unused)
 	do_sysctl_args();
 
 	if (ramdisk_execute_command) {
+		pr_info("$$Trying to execute %s from the ramdisk...\n",
+			ramdisk_execute_command);
 		ret = run_init_process(ramdisk_execute_command);
 		if (!ret)
 			return 0;
@@ -1506,6 +1514,8 @@ static int __ref kernel_init(void *unused)
 	 * trying to recover a really broken machine.
 	 */
 	if (execute_command) {
+		pr_info("$$Trying to execute %s as init process...\n",
+			execute_command);
 		ret = run_init_process(execute_command);
 		if (!ret)
 			return 0;
@@ -1514,6 +1524,8 @@ static int __ref kernel_init(void *unused)
 	}
 
 	if (CONFIG_DEFAULT_INIT[0] != '\0') {
+		pr_info("$$Trying to execute %s as default init process...\n",
+			CONFIG_DEFAULT_INIT);
 		ret = run_init_process(CONFIG_DEFAULT_INIT);
 		if (ret)
 			pr_err("Default init %s failed (error %d)\n",

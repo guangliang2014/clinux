@@ -705,14 +705,22 @@ static void __init populate_initrd_image(char *err)
 
 static void __init do_populate_rootfs(void *unused, async_cookie_t cookie)
 {
+	pr_info("$$ do_populate_rootfs\n");
+
+	pr_info("$$ Load the built in initramfs\n");
 	/* Load the built in initramfs */
 	char *err = unpack_to_rootfs(__initramfs_start, __initramfs_size);
 	if (err)
 		panic_show_mem("%s", err); /* Failed to decompress INTERNAL initramfs */
 
-	if (!initrd_start || IS_ENABLED(CONFIG_INITRAMFS_FORCE))
+	if (!initrd_start || IS_ENABLED(CONFIG_INITRAMFS_FORCE)){
+		pr_info("$$ Load the built in initramfs done.\n");
 		goto done;
+	}else {
+		pr_info("$$ Load the initramfs from initrd\n");
+	}
 
+	//The BLK_DEV_RAM is disenabled.
 	if (IS_ENABLED(CONFIG_BLK_DEV_RAM))
 		printk(KERN_INFO "Trying to unpack rootfs image as initramfs...\n");
 	else
